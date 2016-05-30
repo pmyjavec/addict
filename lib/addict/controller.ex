@@ -61,6 +61,19 @@ defmodule Addict.AddictController do
   end
 
   @doc """
+  Logs out the user with a GET. Invokes `Addict.Configs.post_logout/3` afterwards.
+
+  No required params, it removes the session from the user.
+  """
+
+  def logout(%{method: "GET"} = conn, _) do
+     case Addict.Interactors.DestroySession.call(conn) do
+       {:ok, conn} -> return_success(conn, %{}, Addict.Configs.post_logout)
+       {:error, errors} -> return_error(conn, errors, Addict.Configs.post_logout)
+     end
+  end
+
+  @doc """
   Logs out the user. Invokes `Addict.Configs.post_logout/3` afterwards.
 
   No required params, it removes the session from the user.

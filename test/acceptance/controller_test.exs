@@ -79,11 +79,26 @@ defmodule ControllerTest do
 
   end
 
-  test "it logs out a user" do
+  test "it logs out a user via POST request" do
     Application.put_env(:addict, :user_schema, TestAddictSchema)
     Application.put_env(:addict, :repo, TestAddictRepo)
 
     conn = conn(:post, "/logout", nil)
+           |> with_session
+           |> Plug.Conn.put_session(:current_user, %{email: "john.doe@example.com"})
+           |> TestAddictRouter.call(@opts)
+
+    user = conn |> Plug.Conn.get_session(:current_user)
+
+    assert conn.status == 200
+    assert user == nil
+  end
+
+  test "allows a user to logout via GET request" do
+    Application.put_env(:addict, :user_schema,  TestAddictSchema)
+    Application.put_env(:addict, :repo, TestAddictRepo)
+
+    conn = conn(:get, "/logout", nil)
            |> with_session
            |> Plug.Conn.put_session(:current_user, %{email: "john.doe@example.com"})
            |> TestAddictRouter.call(@opts)
